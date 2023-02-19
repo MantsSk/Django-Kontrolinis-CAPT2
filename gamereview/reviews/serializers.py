@@ -4,4 +4,9 @@ from .models import GameReview
 
 
 class GameReviewSerializer(serializers.ModelSerializer):
-    pass
+    reviewer = serializers.ReadOnlyField(source='reviewer.id')
+
+    class Meta:
+        model = GameReview
+        fields = ['id', 'game', 'reviewer',
+                  'content', 'date_created', 'rating']

@@ -16,7 +16,15 @@ from .serializers import GameReviewSerializer
 
 def index(request):
 
-    return render(request, "index.html")
+    review = GameReview.objects.latest('rating', 'id')  # TASK 5
+
+    context = {
+        'review': review
+    }
+
+    print(review.game.title)
+
+    return render(request, "index.html", context)
 
 
 @csrf_protect
@@ -31,6 +39,7 @@ def register(request):
                 messages.error(
                     request, f'Vartotojo vardas {username} užimtas!')
                 return redirect('register')
+                # TASK 9
         else:
             messages.error(request, 'Slaptažodžiai nesutampa!')
             return redirect('register')
@@ -43,9 +52,13 @@ class PublisherView(generic.ListView):
     paginate_by = 3
 
 
-def publisher(request, publisher_id):
-    single_publisher = get_object_or_404(Publisher, pk=publisher_id)
-    return render(request, 'publisher.html', {'publisher': single_publisher})
+class PublisherDetailView(generic.DetailView):
+    model = Publisher
+    template_name = 'publisher.html'
+
+# def publisher(request, publisher_id):
+#     single_publisher = get_object_or_404(Publisher, pk=publisher_id)
+#     return render(request, 'publisher.html', {'publisher': single_publisher})
 
 
 class GameListView(generic.ListView):
@@ -81,7 +94,7 @@ class GameDetailView(FormMixin, generic.DetailView):
 # API
 
 
-class ReviewListApi(generics.ListAPIView):
+class ReviewListApi(generics.ListCreateAPIView):
     queryset = GameReview.objects.all()
     serializer_class = GameReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
